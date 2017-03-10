@@ -80,7 +80,7 @@ def run(input_json, db_name, tablename):
 
     c.execute(querystr)
 
-    with open(input_json) as jsonFile:
+    with open(input_json, 'rt', encoding='iso-8859-1') as jsonFile:
         rootnode = json.load(jsonFile)
         parse_node(node=rootnode, cursor=c, tablename=tablename, is_instance=False, child_of=None, level=0)
 
