@@ -3,7 +3,7 @@ FROM nlescstoryteller/storyteller
 VOLUME /data
 
 WORKDIR /src/query-builder-preprocessing
-COPY run_docker_stack.sh .
+COPY . /src/query-builder-preprocessing
 RUN chmod +x run_docker_stack.sh
 
 EXPOSE 4567
