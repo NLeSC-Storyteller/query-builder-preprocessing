@@ -29,9 +29,11 @@ def parse_node(node=None, cursor=None, tablename=None, is_instance=None, child_o
         parent_id = -1
     else:
         name = node['name']
+        query = node['query']
+        query_type = node['type']
         cursor.execute('INSERT INTO ' + tablename + ' ' +
-                       '(name, isinstance, childof, childcount, instancecount, mentioncount) VALUES (?,?,?,?,?,?)',
-                       (name, 1 if is_instance is True else 0, child_of, child_count, instance_count, mention_count))
+                       '(name, isinstance, childof, childcount, instancecount, mentioncount, query, query_type) VALUES (?,?,?,?,?,?,?,?)',
+                       (name, 1 if is_instance is True else 0, child_of, child_count, instance_count, mention_count, query, query_type))
         parent_id = cursor.lastrowid
 
     if is_instance:
@@ -75,7 +77,9 @@ def run(input_json, db_name, tablename):
         childof integer not null,
         childcount integer not null,
         instancecount integer not null,
-        mentioncount integer not null
+        mentioncount integer not null,
+        query text,
+        query_type text
         )"""
 
     c.execute(querystr)
