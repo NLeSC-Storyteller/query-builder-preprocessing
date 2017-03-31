@@ -8,18 +8,11 @@ The query builder preprocessor is written in python and makes heavy use of the J
 ### Automated installation
 Please note that the installation and execution process is usually fully automated by Docker and Docker-Compose. For information on installing the full stack, see the https://github.com/cltl/StoryTeller repository for more information.
 
-### Manual installation ans useage
+### Manual installation and useage
 **With Docker**  
 A Dockerfile has been provided for your convenience. Please refer to https://www.docker.com/ for installation of docker.
 ```bash
     docker build -t nlescstoryteller/query-builder-preprocessing
-```
-
-**With bash only**  
-Requires python 3 and a installed version of https://github.com/cltl/StoryTeller. 
-The following bash command may be used to run all the necessary commands:
-```bash
-    run_docker_stack.sh /data
 ```
 
 ## Troubleshooting
@@ -40,7 +33,25 @@ Given an empty query-builder-client interface, the user may want to check the fo
 ```bash
     ls -al /data-tmp
 ```
-The user is expected to find a number of JSON data files here, with sizes > 0kb. If this is not the case, 
+The user is expected to find a number of JSON data files here, with sizes > 0kb. 
+
+3. Check the /data folder for a storyteller.db file
+```bash
+    ls -al /data
+```
+The user is expected to find a storyteller.db file here, with size > 0kb. 
+
+4. If either 2. or 3. (or both) are not the case, the getoverview part of the script in run_docker_stack.sh has most likely failed:
+```bash
+    cd /src/StoryTeller/scripts
+    chmod +x getoverview.sh
+    ./getoverview.sh
+
+    mkdir /data-tmp
+    cp token.index.gz $DATA_DIR/token.index.gz
+    mv *.json /data-tmp
+```
+To fix this issue, try to remove the contents of the /data and /data-tmp directory and any json files in the /src/StoryTeller/scripts directory, and run the run_docker_stack.sh script again.
 
 
 # The Full QueryBuilder / Knowledgestore visualization system
