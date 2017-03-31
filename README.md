@@ -19,6 +19,7 @@ A Dockerfile has been provided for your convenience. Please refer to https://www
 Given an empty query-builder-client interface, the user may want to check the following in this docker container:
 
 1. Connect to the docker container for troubleshooting  
+
 **linux**
 ```bash
     sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
