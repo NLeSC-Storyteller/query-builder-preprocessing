@@ -18,7 +18,7 @@ A Dockerfile has been provided for your convenience. Please refer to https://www
 ## Troubleshooting
 Given an empty query-builder-client interface, the user may want to check the following in this docker container:
 
-1. Connect to the docker container for troubleshooting
+1. Connect to the docker container for troubleshooting  
 **linux**
 ```bash
     sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
@@ -29,19 +29,19 @@ Given an empty query-builder-client interface, the user may want to check the fo
     winpty docker exec -v data:/data -ti nlescstoryteller/query-builder-preprocessing //bin/bash
 ```
 
-2. Check the /data-tmp folder for json files
+2. Check the /data-tmp folder for json files  
 ```bash
     ls -al /data-tmp
 ```
 The user is expected to find a number of JSON data files here, with sizes > 0kb. 
 
-3. Check the /data folder for a storyteller.db file
+3. Check the /data folder for a storyteller.db file  
 ```bash
     ls -al /data
 ```
 The user is expected to find a storyteller.db file here, with size > 0kb. 
 
-4. If either 2. or 3. (or both) are not the case, the getoverview part of the script in run_docker_stack.sh has most likely failed:
+4. If either 2. or 3. (or both) are not the case, the getoverview part of the script in run_docker_stack.sh has most likely failed:  
 ```bash
     cd /src/StoryTeller/scripts
     chmod +x getoverview.sh
