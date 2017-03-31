@@ -1,77 +1,91 @@
-# query-builder-preprocessing
-Collects data preprocessing scripts for query-builder-server
+# nlescstoryteller/query-builder-preprocessing
+Preprocessing module for the QueryBuilder stack. Provides commands to create a database which is ready for use by the server.
 
+## About
+The query builder preprocessor is written in python and makes heavy use of the Java code in https://github.com/cltl/StoryTeller.
 
-# Data structure
+## Installation
+### Automated installation
+Please note that the installation and execution process is usually fully automated by Docker and Docker-Compose. For information on installing the full stack, see the https://github.com/cltl/StoryTeller repository for more information.
 
-- nodes can be of 1 of 4 types:
-    1. entity
-    1. event
-    1. source
-    1. topic
-- nodes can have children and instances.
-- a node's children and instances must be of the same type as the parent. The resulting data structure can thus be a nested one.
-- a node's children are sorted by decreasing ``mention_count``.
-
-Examples:
-
-```
-entities/
-└── entity0
-    ├── entity1
-    ├── entity2
-    └── instance0
-```
-
-```
-events
-└── event0
-```
-
-```
-sources/
-└── source0
-    ├── instance0
-    ├── instance1
-    └── instance2
-```
-
-```
-topics/
-└── topic0
-    ├── instance0
-    ├── instance1
-    ├── instance2
-    ├── topic1
-    ├── topic2
-    ├── topic3
-    └── topic4
-```
-
-
-Questions:
-
-- instances are regarded children of a node? for example [this snippet](https://github.com/NLeSC-Storyteller/query-builder-preprocessing/blob/d8965af72c0378f771256ac8fb634df1a5048d9a/data/entities.json#L4727-L4741) describes an entity National_Health_Service, with a ``child_count`` of 1, but there is no ``children`` field, while ``instances`` contains one element. 
-- Why do both entities and instances-of-entities have a ``type`` field while they are already part of the entity tree?
-- Why do instances list their parent? I already know what their parent is, because the data is nested.
-- How would phrases fit into the succint data model?
-- There aren't any instances of anything (for example, a ``grep`` on ``"event`` returns 1032 occurrences in events.json, of which there are 977 ``eventPhrase``s and 55 ``eventType``s, but no ``eventInstance``s.) Also the ``eventPhrase`` part of an array called ``instances``.
-
-
-# How to parse the JSONs into an sqlite3 database
-
+### Manual installation and useage
+**With Docker**  
+A Dockerfile has been provided for your convenience. Please refer to https://www.docker.com/ for installation of docker.
 ```bash
-cd src
-python3 create_sqlite.py --input ../data/entities.json --name ../data/storyteller.db --tablename entities
-python3 create_sqlite.py --input ../data/events.json --name ../data/storyteller.db --tablename events
-python3 create_sqlite.py --input ../data/sources.json --name ../data/storyteller.db --tablename sources
-python3 create_sqlite.py --input ../data/topics.json --name ../data/storyteller.db --tablename topics
-
-# afterwards, the snippet below should return some records
-sqlite3 ../data/storyteller.db
-sqlite> SELECT * FROM entities;
-sqlite> SELECT * FROM events;
-sqlite> SELECT * FROM sources;
-sqlite> SELECT * FROM topics;
+    docker build -t nlescstoryteller/query-builder-preprocessing
 ```
+
+## Troubleshooting
+Given an empty query-builder-client interface, the user may want to check the following in this docker container:
+
+1. Connect to the docker container for troubleshooting  
+
+**linux**
+```bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
+```
+
+**windows**
+```bash
+    winpty docker exec -v data:/data -ti nlescstoryteller/query-builder-preprocessing //bin/bash
+```
+
+2. Check the /data-tmp folder for json files  
+```bash
+    ls -al /data-tmp
+```
+The user is expected to find a number of JSON data files here, with sizes > 0kb. 
+
+3. Check the /data folder for a storyteller.db file  
+```bash
+    ls -al /data
+```
+The user is expected to find a storyteller.db file here, with size > 0kb. 
+
+4. If either 2. or 3. (or both) are not the case, the getoverview part of the script in run_docker_stack.sh has most likely failed:  
+```bash
+    cd /src/StoryTeller/scripts
+    chmod +x getoverview.sh
+    ./getoverview.sh
+
+    mkdir /data-tmp
+    cp token.index.gz $DATA_DIR/token.index.gz
+    mv *.json /data-tmp
+```
+To fix this issue, try to remove the contents of the /data and /data-tmp directory and any json files in the /src/StoryTeller/scripts directory, and run the run_docker_stack.sh script again.
+
+
+# The Full QueryBuilder / Knowledgestore visualization system
+The full system consists of 7 parts:
+
+0. KnowledgeStore
+    - RDF triple store. The NewsReader KnowledgeStore is a scalable, fault-tolerant, and Semantic Web grounded storage system to jointly store, manage, retrieve, and semantically query, both structured and unstructured data (see https://knowledgestore.fbk.eu/).
+1. cltl/StoryTeller (https://github.com/cltl/StoryTeller)
+    - Support library for querying the knowledge store and creating JSON data from the results.
+2. QueryBuilder Preprocessing (https://github.com/NLeSC-Storyteller/query-builder-preprocessing)
+    - written in python
+    - uses cltl/Storyteller to get an overview of possible queries from the knowledgestore
+    - processes the overview into a sqlite3 database that can be used by the server.
+3. QueryBuilder Server (https://github.com/NLeSC-Storyteller/query-builder-server)
+    - written in javascript, with express.js + sqlite3 database
+    - incudes a custom database trigger written in C on INSERT statements to the queries table.
+    - upon receiving a new query string from QueryBuilder, the Server
+        - stores the received query in a database
+        - runs the received query against the KnowledgeStore using the QueryBuilder Daemon, which updates the list of previous queries and their results, indexed by an identifier.
+4. QueryBuilder Daemon (https://github.com/NLeSC-Storyteller/query-builder-daemon)
+    - written in Java with Xenon (https://github.com/NLeSC/Xenon)
+    - receives requests for knowledgestore queries from the database trigger in the server.
+    - queries the Knowledgestore using cltl/Storyteller
+    - updates the list of previous queries and their results, indexed by an identifier.
+5. QueryBuilder Client (this repository)
+    - written in Typescript and React.js
+    - shows a list of all possible concepts, actors or events from the server
+    - helps the user to compose a sparql query to run against the KnowledgeStore by selecting items of interest, be it concepts, actors, events, etc.
+6. UncertaintyVisualization (https://github.com/NLeSC/UncertaintyVisualization/)
+    - written in javascript and Angular 1 (legacy)
+    - allows the user to select from a list of previously run queries (communicates with Server) to select one for visualization.
+    - visualizes the results selected
+
+
+
 
