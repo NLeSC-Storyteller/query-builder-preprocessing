@@ -14,3 +14,7 @@ cd /src/query-builder-preprocessing/
 chmod +x create_all.sh
 sync
 ./create_all.sh /data-tmp $DATA_DIR/storyteller.db
+sync
+
+chmod +w $DATA_DIR/storyteller.db
+sync
