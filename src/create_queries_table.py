@@ -18,7 +18,7 @@ def run(db_name):
         id integer primary key autoincrement,
         username string,
         query string,
-        lmit number,
+        limit number,
         status number,
         result blob        
         )"""
