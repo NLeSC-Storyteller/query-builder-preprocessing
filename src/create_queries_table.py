@@ -18,16 +18,16 @@ def run(db_name):
         id integer primary key autoincrement,
         username string,
         query string,
-        limit number,
+        mention_limit number,
         status number,
-        result blob        
+        result blob
         )"""
 
     cursor.execute(querystr)
 
     querystr = """CREATE TRIGGER xenon_query
         AFTER INSERT ON queries 
-        BEGIN SELECT xenon_query(NEW.id, NEW.query, NEW.limit); 
+        BEGIN SELECT xenon_query(NEW.id, NEW.query, NEW.mention_limit); 
         end;"""
 
     cursor.execute(querystr)
