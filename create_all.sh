@@ -13,4 +13,4 @@ python3 $DIR/src/create_sqlite.py --input $DATA_DIR/cited.json            --name
 python3 $DIR/src/create_sqlite.py --input $DATA_DIR/topics.json           --name $DB --tablename topics
 python3 $DIR/src/create_sqlite.py --input $DATA_DIR/perspectives.json     --name $DB --tablename perspectives
 
-python3 $DIR/src/create_queries_table.py --name $DB
+#python3 $DIR/src/create_queries_table.py --name $DB
